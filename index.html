@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Efetivo Demillus</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <i class="fas fa-users-cog"></i>
+                <h1>Controle de Efetivo</h1>
+                <p>Demillus</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="matricula">Matrícula</label>
+                    <input type="text" id="matricula" name="matricula" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+                <div id="loginError" class="error-message"></div>
+                <button type="submit" class="btn btn--primary btn--full-width">Entrar</button>
+                <a href="#" class="forgot-password">Esqueci minha senha</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sistema Principal -->
+    <div id="mainApp" class="app-container" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-users-cog"></i>
+                <span>Demillus</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#upload" class="nav-item" data-page="upload" id="navUpload" style="display: none;">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Upload</span>
+                </a>
+                <a href="#vagas" class="nav-item" data-page="vagas">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Vagas</span>
+                </a>
+                <a href="#headcount" class="nav-item" data-page="headcount">
+                    <i class="fas fa-table"></i>
+                    <span>Headcount</span>
+                </a>
+                <a href="#funcionarios" class="nav-item" data-page="funcionarios">
+                    <i class="fas fa-users"></i>
+                    <span>Funcionários</span>
+                </a>
+                <a href="#relatorios" class="nav-item" data-page="relatorios">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Relatórios</span>
+                </a>
+                <a href="#usuarios" class="nav-item" data-page="usuarios" id="navUsuarios" style="display: none;">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Usuários</span>
+                </a>
+                <a href="#configuracoes" class="nav-item" data-page="configuracoes">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn btn--secondary btn--full-width">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <h2 id="pageTitle">Dashboard</h2>
+                <div class="header-right">
+                    <span id="userInfo" class="user-info"></span>
+                </div>
+            </header>
+
+            <!-- Upload Page -->
+            <div id="uploadPage" class="page-content" style="display: none;">
+                <div class="upload-section card">
+                    <h3><i class="fas fa-users"></i> Upload de Funcionários</h3>
+                    <p class="upload-description">Envie o arquivo Excel mensal com os dados dos funcionários</p>
+                    <div class="upload-area" id="uploadAreaFuncionarios">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Arraste o arquivo aqui ou clique para selecionar</p>
+                        <input type="file" id="fileInputFuncionarios" accept=".xlsx,.xls" style="display: none;">
+                        <button class="btn btn--primary" onclick="document.getElementById('fileInputFuncionarios').click()">
+                            <i class="fas fa-folder-open"></i> Selecionar Arquivo
+                        </button>
+                    </div>
+                    <div id="uploadProgressFuncionarios" class="upload-progress" style="display: none;">
+                        <div class="progress-bar"><div class="progress-fill"></div></div>
+                        <p class="progress-text">Processando...</p>
+                    </div>
+                </div>
+
+                <div class="upload-section card">
+                    <h3><i class="fas fa-briefcase"></i> Upload de Vagas Orçadas</h3>
+                    <p class="upload-description">Envie o arquivo Excel com as vagas orçadas por área</p>
+                    <div class="upload-area" id="uploadAreaVagas">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Arraste o arquivo aqui ou clique para selecionar</p>
+                        <input type="file" id="fileInputVagas" accept=".xlsx,.xls" style="display: none;">
+                        <button class="btn btn--primary" onclick="document.getElementById('fileInputVagas').click()">
+                            <i class="fas fa-folder-open"></i> Selecionar Arquivo
+                        </button>
+                    </div>
+                    <div id="uploadProgressVagas" class="upload-progress" style="display: none;">
+                        <div class="progress-bar"><div class="progress-fill"></div></div>
+                        <p class="progress-text">Processando...</p>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 24px;">
+                    <h3>Histórico de Uploads</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Data</th>
+                                    <th>Hora</th>
+                                    <th>Usuário</th>
+                                    <th>Registros</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="uploadHistoryTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vagas Page -->
+            <div id="vagasPage" class="page-content" style="display: none;">
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--color-bg-1);">
+                            <i class="fas fa-briefcase" style="color: #1e40af;"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalVagasOrcadas">0</h3>
+                            <p>Vagas Orçadas</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--color-bg-3);">
+                            <i class="fas fa-user-check" style="color: #16a34a;"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalVagasPreenchidas">0</h3>
+                            <p>Vagas Preenchidas</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--color-bg-4);">
+                            <i class="fas fa-user-plus" style="color: #dc2626;"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalVagasAbertas">0</h3>
+                            <p>Vagas em Aberto</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--color-bg-6);">
+                            <i class="fas fa-users" style="color: #ea580c;"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalAreasVagas">0</h3>
+                            <p>Áreas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-filters">
+                    <input type="text" id="searchVagas" placeholder="Buscar por área, gestor ou função..." class="form-control">
+                    <select id="filterGestor" class="form-control" style="display: none;">
+                        <option value="">Todos os Gestores</option>
+                    </select>
+                </div>
+
+                <div class="chart-card" style="margin-bottom: 24px;">
+                    <h3>Distribuição de Vagas por Área</h3>
+                    <canvas id="chartVagasPorArea"></canvas>
+                </div>
+
+                <div class="table-container">
+                    <table id="tableVagas" class="data-table">
+                        <thead id="vagasTableHeader"></thead>
+                        <tbody id="vagasTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Headcount Page -->
+            <div id="headcountPage" class="page-content" style="display: none;">
+                <div class="table-filters">
+                    <input type="text" id="searchHeadcount" placeholder="Buscar..." class="form-control">
+                    <select id="filterSecaoHeadcount" class="form-control">
+                        <option value="">Todas as Seções</option>
+                    </select>
+                </div>
+                <div class="table-container">
+                    <table id="tableHeadcount" class="data-table">
+                        <thead id="headcountTableHeader"></thead>
+                        <tbody id="headcountTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Dashboard -->
+            <div id="dashboardPage" class="page-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--color-bg-1);">
+                            <i class="fas fa-users" style="color: #1e40af;"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalAtivos">0</h3>
+                            <p>Funcionários Ativos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--color-bg-4);">
+                            <i class="fas fa-user-times" style="color: #dc2626;"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalInativos">0</h3>
+                            <p>Funcionários Inativos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--color-bg-3);">
+                            <i class="fas fa-building" style="color: #16a34a;"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalSecoes">0</h3>
+                            <p>Seções</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--color-bg-6);">
+                            <i class="fas fa-briefcase" style="color: #ea580c;"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalCargos">0</h3>
+                            <p>Cargos</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Funcionários por Seção</h3>
+                        <canvas id="chartSecao"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Distribuição por Gênero</h3>
+                        <canvas id="chartGenero"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Status dos Funcionários</h3>
+                        <canvas id="chartStatus"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Tipo de Contrato</h3>
+                        <canvas id="chartContrato"></canvas>
+                    </div>
+                </div>
+
+                <div class="export-section">
+                    <button class="btn btn--secondary" onclick="exportData('csv')">
+                        <i class="fas fa-file-csv"></i> Exportar CSV
+                    </button>
+                    <button class="btn btn--secondary" onclick="exportData('excel')">
+                        <i class="fas fa-file-excel"></i> Exportar Excel
+                    </button>
+                    <button class="btn btn--secondary" onclick="exportData('pdf')">
+                        <i class="fas fa-file-pdf"></i> Exportar PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Funcionários -->
+            <div id="funcionariosPage" class="page-content" style="display: none;">
+                <div class="page-header">
+                    <button id="btnAddFuncionario" class="btn btn--primary">
+                        <i class="fas fa-plus"></i> Adicionar Funcionário
+                    </button>
+                </div>
+                <div class="table-filters">
+                    <input type="text" id="searchFuncionarios" placeholder="Buscar por nome, matrícula ou cargo..." class="form-control">
+                    <select id="filterSecao" class="form-control">
+                        <option value="">Todas as Seções</option>
+                    </select>
+                    <select id="filterStatus" class="form-control">
+                        <option value="">Todos os Status</option>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Inativo">Inativo</option>
+                    </select>
+                </div>
+                <div class="table-container">
+                    <table id="tableFuncionarios" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Matrícula</th>
+                                <th>Nome</th>
+                                <th>Cargo</th>
+                                <th>Seção</th>
+                                <th>Status</th>
+                                <th>Admissão</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Relatórios -->
+            <div id="relatoriosPage" class="page-content" style="display: none;">
+                <div class="report-filters card">
+                    <h3>Gerar Relatório Personalizado</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Período</label>
+                            <select id="reportPeriodo" class="form-control">
+                                <option value="mes">Último Mês</option>
+                                <option value="trimestre">Último Trimestre</option>
+                                <option value="ano">Último Ano</option>
+                                <option value="todos">Todos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Seção</label>
+                            <select id="reportSecao" class="form-control">
+                                <option value="">Todas</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="reportStatus" class="form-control">
+                                <option value="">Todos</option>
+                                <option value="Ativo">Ativo</option>
+                                <option value="Inativo">Inativo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Contrato</label>
+                            <select id="reportContrato" class="form-control">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn--primary" onclick="generateReport()">
+                        <i class="fas fa-chart-bar"></i> Gerar Relatório
+                    </button>
+                </div>
+                <div id="reportResults" class="report-results"></div>
+            </div>
+
+            <!-- Usuários -->
+            <div id="usuariosPage" class="page-content" style="display: none;">
+                <div class="page-header">
+                    <button id="btnAddUsuario" class="btn btn--primary">
+                        <i class="fas fa-plus"></i> Adicionar Usuário
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="tableUsuarios" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Matrícula</th>
+                                <th>Nome</th>
+                                <th>Perfil</th>
+                                <th>Seção</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Configurações -->
+            <div id="configuracoesPage" class="page-content" style="display: none;">
+                <div class="config-card card">
+                    <h3>Alterar Senha</h3>
+                    <form id="formAlterarSenha">
+                        <div class="form-group">
+                            <label>Senha Atual</label>
+                            <input type="password" id="senhaAtual" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nova Senha</label>
+                            <input type="password" id="novaSenha" class="form-control" required minlength="4">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirmar Nova Senha</label>
+                            <input type="password" id="confirmarSenha" class="form-control" required minlength="4">
+                        </div>
+                        <button type="submit" class="btn btn--primary">
+                            <i class="fas fa-save"></i> Salvar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Alterar Senha (Primeiro Acesso) -->
+    <div id="modalAlterarSenha" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Alterar Senha - Primeiro Acesso</h3>
+            </div>
+            <form id="formPrimeiroAcesso">
+                <div class="modal-body">
+                    <p class="alert alert--warning">Por segurança, você deve alterar sua senha no primeiro acesso.</p>
+                    <div class="form-group">
+                        <label>Nova Senha</label>
+                        <input type="password" id="novaSenhaPrimeiroAcesso" class="form-control" required minlength="4">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmar Nova Senha</label>
+                        <input type="password" id="confirmarSenhaPrimeiroAcesso" class="form-control" required minlength="4">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn--primary">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Funcionário -->
+    <div id="modalFuncionario" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="modalFuncionarioTitle">Adicionar Funcionário</h3>
+                <button class="modal-close" onclick="closeModal('modalFuncionario')">&times;</button>
+            </div>
+            <form id="formFuncionario">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Matrícula *</label>
+                            <input type="text" name="matricula" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nome Completo *</label>
+                            <input type="text" name="nome_completo" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cargo *</label>
+                            <input type="text" name="cargo" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Função</label>
+                            <input type="text" name="funcao" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Área</label>
+                            <input type="text" name="area" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Seção *</label>
+                            <input type="text" name="secao" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Centro de Custo</label>
+                            <input type="text" name="centro_custo" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Contrato</label>
+                            <select name="tipo_contrato" class="form-control">
+                                <option value="CLT">CLT</option>
+                                <option value="PJ">PJ</option>
+                                <option value="Estágio">Estágio</option>
+                                <option value="Temporário">Temporário</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Data de Admissão</label>
+                            <input type="date" name="admissao" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Gênero</label>
+                            <select name="genero" class="form-control">
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Data de Nascimento</label>
+                            <input type="date" name="data_nascimento" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefone</label>
+                            <input type="tel" name="telefone" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select name="status" class="form-control">
+                                <option value="Ativo">Ativo</option>
+                                <option value="Inativo">Inativo</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--secondary" onclick="closeModal('modalFuncionario')">Cancelar</button>
+                    <button type="submit" class="btn btn--primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Usuário -->
+    <div id="modalUsuario" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalUsuarioTitle">Adicionar Usuário</h3>
+                <button class="modal-close" onclick="closeModal('modalUsuario')">&times;</button>
+            </div>
+            <form id="formUsuario">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Matrícula *</label>
+                        <input type="text" name="matricula" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nome *</label>
+                        <input type="text" name="nome" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Perfil *</label>
+                        <select name="perfil" class="form-control" required>
+                            <option value="Administrador">Administrador</option>
+                            <option value="Gerente">Gerente</option>
+                            <option value="Coordenador">Coordenador</option>
+                            <option value="Analista">Analista</option>
+                            <option value="Visualizador">Visualizador</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Seção</label>
+                        <input type="text" name="secao" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="ativo" class="form-control">
+                            <option value="true">Ativo</option>
+                            <option value="false">Inativo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--secondary" onclick="closeModal('modalUsuario')">Cancelar</button>
+                    <button type="submit" class="btn btn--primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
